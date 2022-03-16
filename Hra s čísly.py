@@ -1,134 +1,73 @@
-from random import seed, randint
-
-DEBUG = False
+from random import choice
 
 
-def show_welcome():
-    string = "Welcome to Bulls and Cows game, cowboy!"
-    print(len(string) * "+")
-    print(string)
-
-
-def show_banner(length):
-    print(f"I've generated a random {length} digit number for you.")
-    print("Let's play a bulls and cows game.")
-
-
-def set_game_num_len():
+def main():
+    tajenka = str(choice(generator_cisel()))
+    cows = 0
+    bulls = 0
     while True:
-        try:
-            rand_num_len = int(input("Type length of your secret number: "))
+        hadani = input("Zadej svůj typ na číslo od 1000 do 9999: ")
+        mnozina_hadani = set()
+        for symbol in hadani:
+            mnozina_hadani.add(symbol)
 
-            if rand_num_len <= 10 and rand_num_len != 0:
-                return rand_num_len
-            elif rand_num_len == 0:
-                print("Hold your horses, partner! How you want guess 0 digit number?")
-                continue
-            else:
-                print(
-                    "Hold your horses, partner! Your secret number length must have 10 digits or less"
-                )
-                continue
-
-        except ValueError:
-            print("Hold your horses, partner! This is gibberish, not a number!")
-            continue
+        kontrola_inputu(hadani, mnozina_hadani, tajenka, cows, bulls)
 
 
-def generate_number(rand_num_len):
-    seed()
-    rand_number = []
+def kontrola_inputu(hadani, mnozina_hadani, tajenka, cows, bulls):
+    if hadani.isnumeric() == False:
+        print("Neplatné číslo.")
 
-    while len(rand_number) < rand_num_len:
-        number = str(randint(0, 9))
-        if number not in rand_number:
-            rand_number.append(number)
+    elif len(hadani) != 4:
+        print("Špatně délka čísla.")
 
-    return rand_number
+    elif int(hadani) not in range(1000, 9999):
+        print("číslo nesmí začínat nulou.")
 
+    elif len(mnozina_hadani) != 4:
+        print("Čísla se v zadaném čísle nemůžou opakovat.")
 
-def check_valid_number(user_in):
-    try:
-        int(user_in)
-        return True
-    except ValueError:
-        return False
+    else:
+        pocitani(hadani, tajenka, cows, bulls)
 
 
-def user_input(num_len):
-    while True:
+def pocitani(hadani, tajenka, cows, bulls):
+    for index, číslo in enumerate(hadani):
+        if číslo in tajenka and číslo != tajenka[index]:
+            cows += 1
+        elif číslo == tajenka[index]:
+            bulls += 1
 
-        user_num_raw = input("Your number: ")
-        if check_valid_number(user_num_raw):
-
-            user_num_list = list(user_num_raw)
-
-            if len(user_num_list) < num_len:
-                print(
-                    f"Hold your horses, partner! You aim for {num_len} digits number. You number is too short. You need a plan!"
-                )
-                continue
-            elif len(user_num_list) > num_len:
-                print(
-                    f"Hold your horses, partner! You aim for {num_len} digits number. You number is too long. You need a plan!"
-                )
-                continue
-            else:
-                return user_num_list
-
-        else:
-            print("Hold your horses, partner! This is gibberish, not a number!")
+    vypis(bulls, cows)
 
 
-def check_conditions(user_num, game_num):
-    score = {"bulls": 0, "cows": 0}
-    for u, g in zip(user_num, game_num):
+def vypis(bulls, cows):
+    if bulls == 1 and cows == 1:
+        print("bull:", bulls, "cow:", cows)
 
-        if u == g:
-            score["bulls"] += 1
-        elif u in game_num:
-            score["cows"] += 1
+    elif bulls == 4:
+        print("vyhrál jsi")
+        quit()
+    elif bulls == 1 and cows != 1:
+        print("bull:", bulls, "cows:", cows)
 
-    return score
+    elif bulls != 1 and cows == 1:
+        print("bulls:", bulls, "cow:", cows)
 
-
-def game_loop():
-    show_welcome()
-    number_length = set_game_num_len()
-    game_number = generate_number(number_length)
-    show_banner(number_length)
-
-    user_attempt = 1
-    while True:
-
-        if DEBUG:
-            print("Game number", game_number)
-
-        user_number = user_input(number_length)
-
-        if DEBUG:
-            print("User number", user_number)
-
-        user_score = check_conditions(user_number, game_number)
-
-        print(f"{user_score['bulls']} bulls, {user_score['cows']} cows")
-
-        if user_score["bulls"] == number_length:
-            print(f"You win, partner! You need {user_attempt} guesses")
-
-            if user_attempt <= number_length:
-                win_string = "Splendid!"
-            elif number_length < user_attempt < (number_length + 2):
-                win_string = "Good"
-            elif (number_length + 2) < user_attempt < (number_length + 3):
-                win_string = "Well...."
-            else:
-                win_string = "GIT GUD"
-            print("")
-            print(10 * "*", win_string, 10 * "*")
-            break
-        user_attempt += 1
+    elif bulls != 1 and cows != 1:
+        print("bulls:", bulls, "cows:", cows)
 
 
-if __name__ == "__main__":
-    game_loop()
+def generator_cisel():
+    mnozina = set()
+    seznam_tajenka = []
+    for číslo in range(1000, 10000):
+        for hodnota in str(číslo):
+            mnozina.add(hodnota)
+        if len(mnozina) == 4:
+            seznam_tajenka.append(číslo)
+        mnozina = set()
+    return seznam_tajenka
+
+
+main()
